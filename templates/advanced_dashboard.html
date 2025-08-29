@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Advanced Dashboard - SIG Cafe Jogja</title>
+
+    <!-- CSS Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #17a2b8;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            padding-top: 80px;
+        }
+
+        .navbar {
+            background: rgba(44, 62, 80, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .filter-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            position: sticky;
+            top: 100px;
+            z-index: 100;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .chart-container:hover {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .map-container {
+            height: 600px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--secondary-color), var(--success-color));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .stat-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-filter {
+            background: linear-gradient(135deg, var(--secondary-color), var(--success-color));
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(52, 152, 219, 0.2);
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cafe-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .cafe-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .cafe-item:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .cafe-name {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .cafe-details {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .filter-panel {
+                position: static;
+                top: auto;
+            }
+
+            .map-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-map-marked-alt me-2"></i>
+                SIG Cafe Jogja
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">
+                            <i class="fas fa-chart-bar me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analysis">
+                            <i class="fas fa-analytics me-1"></i>Analysis
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1>
+                        <i class="fas fa-chart-bar me-3"></i>
+                        Advanced Dashboard
+                    </h1>
+                    <p class="mb-0">Interactive visualization and analysis of cafe data across Yogyakarta</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Filter Panel -->
+            <div class="col-lg-3">
+                <div class="filter-panel">
+                    <h5>
+                        <i class="fas fa-filter me-2"></i>
+                        Advanced Filters
+                    </h5>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Search Cafes</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by name...">
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Regency</label>
+                        <select class="form-select" id="regencyFilter">
+                            <option value="">All Regencies</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Cafe Type</label>
+                        <select class="form-select" id="typeFilter">
+                            <option value="">All Types</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Rating Range</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="number" class="form-control" id="minRating" placeholder="Min" min="0" max="5" step="0.1">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" class="form-control" id="maxRating" placeholder="Max" min="0" max="5" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Price Category</label>
+                        <select class="form-select" id="priceFilter">
+                            <option value="">All Price Ranges</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-filter" onclick="applyFilters()">
+                            <i class="fas fa-search me-2"></i>
+                            Apply Filters
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                            <i class="fas fa-times me-2"></i>
+                            Clear All
+                        </button>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="mt-4">
+                        <h6>Current Results</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-number" id="filteredCount">0</div>
+                                    <div class="stat-label">Cafes</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-number" id="avgFilteredRating">0.0</div>
+                                    <div class="stat-label">Avg Rating</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <!-- Statistics Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalCafes">0</div>
+                            <div class="stat-label">
+                                <i class="fas fa-coffee me-1"></i>
+                                Total Cafes
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number" id="avgRating">0.0</div>
+                            <div class="stat-label">
+                                <i class="fas fa-star me-1"></i>
+                                Avg Rating
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalReviews">0</div>
+                            <div class="stat-label">
+                                <i class="fas fa-comments me-1"></i>
+                                Total Reviews
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number" id="regencyCount">0</div>
+                            <div class="stat-label">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                Regencies
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Map -->
+                <div class="chart-container" id="map">
+                    <div class="chart-title">
+                        <i class="fas fa-map-marked-alt"></i>
+                        Interactive Cafe Map
+                    </div>
+                    <div class="map-container" id="mapContainer">
+                        <div class="loading-spinner" id="mapLoading"></div>
+                        <div id="mapContent"></div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1 -->
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <i class="fas fa-chart-bar"></i>
+                                Rating Distribution
+                            </div>
+                            <div id="ratingChart">
+                                <div class="loading-spinner" id="ratingLoading"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <i class="fas fa-chart-pie"></i>
+                                Regency Distribution
+                            </div>
+                            <div id="regencyChart">
+                                <div class="loading-spinner" id="regencyLoading"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <i class="fas fa-box"></i>
+                                Rating by Type
+                            </div>
+                            <div id="typeChart">
+                                <div class="loading-spinner" id="typeLoading"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <i class="fas fa-chart-line"></i>
+                                Reviews vs Rating
+                            </div>
+                            <div id="scatterChart">
+                                <div class="loading-spinner" id="scatterLoading"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 3 -->
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <i class="fas fa-dollar-sign"></i>
+                                Price Categories
+                            </div>
+                            <div id="priceChart">
+                                <div class="loading-spinner" id="priceLoading"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <i class="fas fa-trophy"></i>
+                                Top Popular Cafes
+                            </div>
+                            <div id="topCafesChart">
+                                <div class="loading-spinner" id="topCafesLoading"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cafe List -->
+                <div class="chart-container" id="filters">
+                    <div class="chart-title">
+                        <i class="fas fa-list"></i>
+                        Filtered Cafe Results
+                        <span class="badge bg-primary ms-2" id="resultCount">0</span>
+                    </div>
+                    <div class="cafe-list" id="cafeList">
+                        <div class="no-data">
+                            <i class="fas fa-search fa-3x mb-3"></i>
+                            <h5>Apply filters to see results</h5>
+                            <p>Use the filter panel on the left to search and filter cafes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let allCafes = [];
+        let filteredCafes = [];
+        let charts = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+        });
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load statistics
+                const statsResponse = await fetch('/api/statistics');
+                const stats = await statsResponse.json();
+                updateStatistics(stats);
+                populateFilterOptions(stats);
+
+                // Load charts
+                const chartsResponse = await fetch('/api/charts');
+                const chartsData = await chartsResponse.json();
+                renderCharts(chartsData);
+
+                // Load map
+                loadMap();
+
+                // Load initial cafe data
+                const cafesResponse = await fetch('/api/cafes');
+                const cafesData = await cafesResponse.json();
+                allCafes = cafesData.cafes;
+                filteredCafes = allCafes;
+                updateFilteredStats();
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        // Update statistics display
+        function updateStatistics(stats) {
+            document.getElementById('totalCafes').textContent = stats.total_cafes;
+            document.getElementById('avgRating').textContent = stats.avg_rating;
+            document.getElementById('totalReviews').textContent = (stats.total_reviews/1000).toFixed(0) + 'K';
+            document.getElementById('regencyCount').textContent = Object.keys(stats.regency_distribution).length;
+        }
+
+        // Populate filter options
+        function populateFilterOptions(stats) {
+            // Regency options
+            const regencySelect = document.getElementById('regencyFilter');
+            Object.keys(stats.regency_distribution).forEach(regency => {
+                const option = document.createElement('option');
+                option.value = regency;
+                option.textContent = `${regency} (${stats.regency_distribution[regency]})`;
+                regencySelect.appendChild(option);
+            });
+
+            // Type options
+            const typeSelect = document.getElementById('typeFilter');
+            Object.keys(stats.type_distribution).forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = `${type} (${stats.type_distribution[type]})`;
+                typeSelect.appendChild(option);
+            });
+
+            // Price options
+            const priceSelect = document.getElementById('priceFilter');
+            Object.keys(stats.price_distribution).forEach(price => {
+                const option = document.createElement('option');
+                option.value = price;
+                option.textContent = `${price} (${stats.price_distribution[price]})`;
+                priceSelect.appendChild(option);
+            });
+        }
+
+        // Render charts
+        function renderCharts(chartsData) {
+            // Rating histogram
+            const ratingData = JSON.parse(chartsData.rating_histogram);
+            Plotly.newPlot('ratingChart', ratingData.data, ratingData.layout, {responsive: true});
+            document.getElementById('ratingLoading').style.display = 'none';
+
+            // Regency pie chart
+            const regencyData = JSON.parse(chartsData.regency_pie);
+            Plotly.newPlot('regencyChart', regencyData.data, regencyData.layout, {responsive: true});
+            document.getElementById('regencyLoading').style.display = 'none';
+
+            // Type box plot
+            const typeData = JSON.parse(chartsData.type_rating_box);
+            Plotly.newPlot('typeChart', typeData.data, typeData.layout, {responsive: true});
+            document.getElementById('typeLoading').style.display = 'none';
+
+            // Scatter plot
+            const scatterData = JSON.parse(chartsData.reviews_rating_scatter);
+            Plotly.newPlot('scatterChart', scatterData.data, scatterData.layout, {responsive: true});
+            document.getElementById('scatterLoading').style.display = 'none';
+
+            // Price bar chart
+            const priceData = JSON.parse(chartsData.price_bar);
+            Plotly.newPlot('priceChart', priceData.data, priceData.layout, {responsive: true});
+            document.getElementById('priceLoading').style.display = 'none';
+
+            // Top cafes chart
+            const topCafesData = JSON.parse(chartsData.top_cafes_bar);
+            Plotly.newPlot('topCafesChart', topCafesData.data, topCafesData.layout, {responsive: true});
+            document.getElementById('topCafesLoading').style.display = 'none';
+        }
+
+        // Load map
+        async function loadMap() {
+            document.getElementById('mapLoading').style.display = 'block';
+            try {
+                const response = await fetch('/api/map');
+                const data = await response.json();
+                document.getElementById('mapContent').innerHTML = data.map_html;
+                document.getElementById('mapLoading').style.display = 'none';
+            } catch (error) {
+                console.error('Error loading map:', error);
+                document.getElementById('mapContent').innerHTML = '<div class="no-data"><p>Failed to load map</p></div>';
+                document.getElementById('mapLoading').style.display = 'none';
+            }
+        }
+
+        // Apply filters
+        async function applyFilters() {
+            const filters = {
+                search: document.getElementById('searchInput').value,
+                regency: document.getElementById('regencyFilter').value,
+                type: document.getElementById('typeFilter').value,
+                min_rating: document.getElementById('minRating').value,
+                max_rating: document.getElementById('maxRating').value,
+                price_category: document.getElementById('priceFilter').value
+            };
+
+            // Build query string
+            const params = new URLSearchParams();
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value) params.append(key, value);
+            });
+
+            try {
+                const response = await fetch(`/api/cafes?${params.toString()}`);
+                const data = await response.json();
+                filteredCafes = data.cafes;
+                updateFilteredResults();
+                updateFilteredStats();
+            } catch (error) {
+                console.error('Error applying filters:', error);
+                showError('Failed to apply filters');
+            }
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('regencyFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('minRating').value = '';
+            document.getElementById('maxRating').value = '';
+            document.getElementById('priceFilter').value = '';
+
+            filteredCafes = allCafes;
+            updateFilteredResults();
+            updateFilteredStats();
+        }
+
+        // Update filtered results display
+        function updateFilteredResults() {
+            const cafeList = document.getElementById('cafeList');
+            const resultCount = document.getElementById('resultCount');
+
+            resultCount.textContent = filteredCafes.length;
+
+            if (filteredCafes.length === 0) {
+                cafeList.innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-search fa-3x mb-3"></i>
+                        <h5>No cafes found</h5>
+                        <p>Try adjusting your filters to see more results</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const cafeItems = filteredCafes.slice(0, 50).map(cafe => `
+                <div class="cafe-item">
+                    <div class="cafe-name"><a href="${cafe.maps_link}">${cafe.name}</a></div>
+                    <div class="cafe-details">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                ${cafe.regency} • ${cafe.type}
+                            </div>
+                            <div class="col-md-6">
+                                <span class="rating-stars">
+                                    ${'★'.repeat(Math.floor(cafe.rating))}${'☆'.repeat(5-Math.floor(cafe.rating))}
+                                </span>
+                                ${cafe.rating}/5.0 (${cafe.reviews_count} reviews)
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <i class="fas fa-dollar-sign text-success me-1"></i>
+                            ${cafe.price_range || 'Price not available'}
+                        </div>
+                        <div class="mt-1">
+                            <small class="text-muted">
+                                <i class="fas fa-map-pin me-1"></i>
+                                ${cafe.address ? cafe.address.substring(0, 80) + '...' : 'Address not available'}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            cafeList.innerHTML = cafeItems;
+
+            if (filteredCafes.length > 50) {
+                cafeList.innerHTML += `
+                    <div class="text-center p-3">
+                        <small class="text-muted">Showing first 50 results of ${filteredCafes.length} total</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Update filtered statistics
+        function updateFilteredStats() {
+            const count = filteredCafes.length;
+            const avgRating = count > 0 ?
+                (filteredCafes.reduce((sum, cafe) => sum + (cafe.rating || 0), 0) / count).toFixed(1) :
+                '0.0';
+
+            document.getElementById('filteredCount').textContent = count;
+            document.getElementById('avgFilteredRating').textContent = avgRating;
+        }
+
+        // Refresh dashboard
+        async function refreshDashboard() {
+            showLoading('Refreshing dashboard data...');
+            await loadDashboardData();
+            hideLoading();
+            showNotification('Dashboard refreshed successfully!', 'success');
+        }
+
+        // Show loading overlay
+        function showLoading(text = 'Loading...') {
+            // Simple loading implementation
+            console.log(text);
+        }
+
+        // Hide loading overlay
+        function hideLoading() {
+            console.log('Loading complete');
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const alertClass = type === 'success' ? 'alert-success' :
+                              type === 'error' ? 'alert-danger' : 'alert-info';
+
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 100px; right: 20px; z-index: 10000; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // Show error
+        function showError(message) {
+            showNotification(message, 'error');
+        }
+
+        // Add event listeners for real-time filtering
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-apply filters on input change
+            const filterInputs = ['searchInput', 'regencyFilter', 'typeFilter', 'minRating', 'maxRating', 'priceFilter'];
+            filterInputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', debounce(applyFilters, 500));
+                }
+            });
+        });
+
+        // Debounce function for performance
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+</html>

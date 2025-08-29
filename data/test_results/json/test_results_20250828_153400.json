@@ -1,0 +1,138 @@
+{
+  "metadata": {
+    "total_cafes": 5,
+    "scraped_at": "2025-08-28T15:34:00.398463",
+    "scraper_version": "ultimate_v2.0_parallel_dedup",
+    "statistics": {
+      "total_processed": 5,
+      "successful_extractions": 5,
+      "failed_extractions": 0,
+      "high_precision_count": 5,
+      "duplicates_removed": 0,
+      "unique_cafes": 5,
+      "start_time": 1756370018.5471091
+    },
+    "precision_stats": {
+      "avg_precision": 0.9,
+      "high_precision_count": 5,
+      "coordinate_sources": {
+        "extract_from_url": 5
+      }
+    },
+    "deduplication_stats": {
+      "unique_cafes": 5,
+      "duplicates_removed": 0,
+      "deduplication_rate": 0.0,
+      "unique_names_tracked": 5,
+      "unique_coordinates_tracked": 5,
+      "unique_hashes_tracked": 5
+    },
+    "parallel_processing": {
+      "max_workers": 3,
+      "batch_size": 10,
+      "processing_mode": "parallel_batches"
+    }
+  },
+  "cafes": [
+    {
+      "name": "LOKO CAFE MALIOBORO",
+      "address": "Cafe · Komp. Ps. Kembang, Jl. Ps. Kembang",
+      "rating": 0.0,
+      "reviews_count": 0,
+      "price_range": "Rp 25–50K",
+      "lat": -7.7897901,
+      "lon": 110.3657681,
+      "district": "Yogyakarta",
+      "village": "",
+      "regency": "Yogyakarta",
+      "type": "Modern",
+      "phone": "",
+      "website": "",
+      "opening_hours": "",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T15:34:00.085307",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Karta Coffee & Eatery",
+      "address": "Cafe · Karta Coffee & Eatery, Jl. Malioboro. 52-58, Suryatmajan, Danurejan Plaza Malioboro, Lt. 1 Unit 13-16",
+      "rating": 0.0,
+      "reviews_count": 0,
+      "price_range": "Rp 25–50K",
+      "lat": -7.7936271,
+      "lon": 110.3658864,
+      "district": "Yogyakarta",
+      "village": "",
+      "regency": "Yogyakarta",
+      "type": "Coffee Shop",
+      "phone": "",
+      "website": "",
+      "opening_hours": "",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T15:34:00.105899",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Sellie Coffee Malioboro",
+      "address": "",
+      "rating": 0.0,
+      "reviews_count": 0,
+      "price_range": "Rp 25–50K",
+      "lat": -7.7939257,
+      "lon": 110.3654873,
+      "district": "Yogyakarta",
+      "village": "",
+      "regency": "Yogyakarta",
+      "type": "Coffee Shop",
+      "phone": "",
+      "website": "",
+      "opening_hours": "",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T15:34:00.198020",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Azen Coffee Malioboro",
+      "address": "Coffee shop · Jl. Suryatmajan No.39",
+      "rating": 0.0,
+      "reviews_count": 0,
+      "price_range": "Rp 25–50K",
+      "lat": -7.7964764,
+      "lon": 110.3678926,
+      "district": "Yogyakarta",
+      "village": "",
+      "regency": "Yogyakarta",
+      "type": "Coffee Shop",
+      "phone": "",
+      "website": "",
+      "opening_hours": "",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T15:34:00.230393",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Kala Jumpa Bar & Dine",
+      "address": "Cafe ·  · Jl. Malioboro No.42",
+      "rating": 0.0,
+      "reviews_count": 0,
+      "price_range": "Rp 50–75K",
+      "lat": -7.793899,
+      "lon": 110.3658441,
+      "district": "Yogyakarta",
+      "village": "",
+      "regency": "Yogyakarta",
+      "type": "Modern",
+      "phone": "",
+      "website": "",
+      "opening_hours": "",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T15:34:00.397542",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    }
+  ]
+}

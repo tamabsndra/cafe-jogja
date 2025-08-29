@@ -1,0 +1,138 @@
+{
+  "metadata": {
+    "total_cafes": 5,
+    "scraped_at": "2025-08-28T16:00:36.010760",
+    "scraper_version": "ultimate_v2.0_parallel_dedup",
+    "statistics": {
+      "total_processed": 5,
+      "successful_extractions": 5,
+      "failed_extractions": 0,
+      "high_precision_count": 5,
+      "duplicates_removed": 0,
+      "unique_cafes": 5,
+      "start_time": 1756371617.115638
+    },
+    "precision_stats": {
+      "avg_precision": 0.9,
+      "high_precision_count": 5,
+      "coordinate_sources": {
+        "extract_from_url": 5
+      }
+    },
+    "deduplication_stats": {
+      "unique_cafes": 5,
+      "duplicates_removed": 0,
+      "deduplication_rate": 0.0,
+      "unique_names_tracked": 5,
+      "unique_coordinates_tracked": 5,
+      "unique_hashes_tracked": 5
+    },
+    "parallel_processing": {
+      "max_workers": 3,
+      "batch_size": 10,
+      "processing_mode": "parallel_batches"
+    }
+  },
+  "cafes": [
+    {
+      "name": "Sellie Coffee Malioboro",
+      "address": "",
+      "rating": 4.5,
+      "reviews_count": 519,
+      "price_range": "",
+      "lat": -7.7939257,
+      "lon": 110.3654873,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Coffee Shop",
+      "phone": "",
+      "website": "",
+      "opening_hours": "Buka ⋅ Tutup pukul 23.30",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T16:00:35.690303",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Loko Cafe - Malioboro",
+      "address": "Kafe · Komp. Ps. Kembang, Jl. Ps. Kembang",
+      "rating": 4.5,
+      "reviews_count": 7602,
+      "price_range": "",
+      "lat": -7.7897901,
+      "lon": 110.3657681,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Modern",
+      "phone": "",
+      "website": "",
+      "opening_hours": "Buka ⋅ Tutup pukul 23.00",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T16:00:35.721575",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Karta Coffee & Eatery",
+      "address": "Kafe · Karta Coffee & Eatery, Jl. Malioboro. 52-58, Suryatmajan, Danurejan Plaza Malioboro, Lt. 1 Unit 13-16",
+      "rating": 4.8,
+      "reviews_count": 511,
+      "price_range": "",
+      "lat": -7.7936271,
+      "lon": 110.3658864,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Coffee Shop",
+      "phone": "",
+      "website": "",
+      "opening_hours": "Buka ⋅ Tutup pukul 22.00",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T16:00:35.723453",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "LAJU MALIOBORO",
+      "address": "Kedai Kopi · Jl. Ps. Kembang No.95",
+      "rating": 4.5,
+      "reviews_count": 186,
+      "price_range": "",
+      "lat": -7.7897405,
+      "lon": 110.3645237,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Modern",
+      "phone": "",
+      "website": "",
+      "opening_hours": "Buka ⋅ Tutup pukul 21.00",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T16:00:35.942790",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Azen Coffee Malioboro",
+      "address": "Kedai Kopi · Jl. Suryatmajan No.39",
+      "rating": 4.7,
+      "reviews_count": 356,
+      "price_range": "",
+      "lat": -7.7964764,
+      "lon": 110.3678926,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Coffee Shop",
+      "phone": "",
+      "website": "",
+      "opening_hours": "Buka ⋅ Tutup pukul 00.00",
+      "search_query": "cafe malioboro",
+      "scraped_at": "2025-08-28T16:00:36.009992",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    }
+  ]
+}
