@@ -444,9 +444,11 @@ class UltimateCafeScraper:
         self.max_workers = 3  # Number of parallel threads
         self.batch_size = 10  # Elements per batch
 
-        # Productivity tracking
+        # Productivity tracking with comprehensive settings
         self.consecutive_empty_queries = 0
-        self.max_consecutive_empty = 10000  # Increase from 20 to 1000
+        self.max_consecutive_empty = 200  # Increase for comprehensive coverage
+        self.query_performance = {}  # Track query effectiveness
+        self.high_yield_mode = False  # Keep comprehensive mode
 
         # Statistics with deduplication tracking
         self.stats = {
@@ -459,8 +461,8 @@ class UltimateCafeScraper:
             'start_time': time.time()
         }
 
-        # Search strategies
-        self.search_strategies = self._generate_search_strategies()
+        # Search strategies with comprehensive mode (user preference for complete coverage)
+        self.search_strategies = self._generate_search_strategies(high_yield_only=False, include_specialty=True)
 
     def setup_logging(self):
         """Setup comprehensive logging"""
@@ -548,14 +550,36 @@ class UltimateCafeScraper:
             self.logger.debug(f"✅ Added unique cafe: {cafe.name}")
             return True
 
-    def _generate_search_strategies(self) -> List[Dict]:
-
+    def _generate_search_strategies(self, high_yield_only: bool = False, include_specialty: bool = True) -> List[Dict]:
+        """Generate search strategies with optional high-yield filtering and specialty coverage"""
+        
+        # High-yield keywords (proven to return more results)
+        high_yield_keywords = [
+            "cafe", "coffee shop", "kedai kopi", "kopi", "coffee"
+        ]
+        
+        # Specialty keywords for comprehensive coverage
+        specialty_keywords = [
+            "roastery", "specialty coffee", "espresso bar", "coffee house",
+            "warung kopi", "tempat ngopi", "kopi tradisional", "kopi kekinian"
+        ]
+        
+        # Full keyword set for comprehensive scraping
         base_keywords = [
             "cafe", "coffee shop", "kedai kopi", "warung kopi", "tempat ngopi",
             "kopi kekinian", "kopi tradisional", "espresso bar", "roastery",
             "Eatery Bar & Coffee", "Bar", "Roastery" "Eatery", "coffee house", "kopi enak", "coffee corner",
             "specialty coffee", "specialty coffee roastery", "coffee reserve"
         ]
+        
+        # Choose keywords based on mode
+        if high_yield_only:
+            if include_specialty:
+                keywords_to_use = high_yield_keywords + specialty_keywords
+            else:
+                keywords_to_use = high_yield_keywords
+        else:
+            keywords_to_use = base_keywords
 
         contexts = [
             "di", "hits", "viral", "kalcer", "skena", "murah", "instagrammable", "cozy", "buat nugas",
@@ -610,28 +634,28 @@ class UltimateCafeScraper:
         all_queries = set()
 
         # Kombinasi base keywords dengan konteks & wilayah besar
-        for kw in base_keywords:
+        for kw in keywords_to_use:
             for ctx in contexts:
                 for reg in regions:
                     query = f"{kw} {ctx} {reg}".strip()
                     all_queries.add(query)
 
         # Tambahin kombinasi dengan sub-area
-        for kw in base_keywords:
+        for kw in keywords_to_use:
             for ctx in contexts:
                 for area in sub_areas:
                     query = f"{kw} {ctx} {area}".strip()
                     all_queries.add(query)
 
         # Tambahin kombinasi dengan landmark
-        for kw in base_keywords:
+        for kw in keywords_to_use:
             for ctx in contexts:
                 for lm in landmarks:
                     query = f"{kw} {ctx} dekat {lm}".strip()
                     all_queries.add(query)
 
         # Tambahin kombinasi dengan university
-        for kw in base_keywords:
+        for kw in keywords_to_use:
             for ctx in contexts:
                 for uni in universities_jogja:
                     query = f"{kw} {ctx} sekitar {uni} jogja".strip()
@@ -1554,21 +1578,22 @@ class UltimateCafeScraper:
 
                 results = self.search_and_extract(query, expected)
 
-                # Track productivity
-                if not results:
-                    self.consecutive_empty_queries += 1
-                    self.logger.debug(f"🔄 Empty query count: {self.consecutive_empty_queries}")
-
-                    # Try fallback for 'dekat' queries
-                    if 'dekat' in query:
-                        fallback_query = query.replace(' dekat', '').strip()
-                        self.logger.info(f"🔄 No results, trying fallback: {fallback_query}")
-                        fallback_results = self.search_and_extract(fallback_query, expected // 2)
-                        if fallback_results:
-                            results = fallback_results
-                            self.consecutive_empty_queries = 0  # Reset counter
+                # Track query performance for adaptive optimization
+                if results:
+                    self.query_performance[query] = len(results)
+                    self.consecutive_empty_queries = 0
                 else:
-                    self.consecutive_empty_queries = 0  # Reset counter on success
+                    self.consecutive_empty_queries += 1
+                    self.query_performance[query] = 0
+                    
+                # Switch to high-yield mode if too many empty queries
+                if self.consecutive_empty_queries >= 50 and not self.high_yield_mode:
+                    self.logger.info("🔄 Switching to high-yield query mode")
+                    self.high_yield_mode = True
+                    # Regenerate strategies with high-yield keywords only
+                    remaining_strategies = strategies[i+1:]
+                    high_yield_strategies = self._generate_search_strategies(high_yield_only=True)
+                    strategies = strategies[:i+1] + high_yield_strategies[:len(remaining_strategies)]
 
                 # Early stopping if too many consecutive empty queries
                 if self.consecutive_empty_queries >= self.max_consecutive_empty:

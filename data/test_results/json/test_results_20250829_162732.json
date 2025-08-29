@@ -1,0 +1,180 @@
+{
+  "metadata": {
+    "total_cafes": 5,
+    "scraped_at": "2025-08-29T16:27:32.634435",
+    "scraper_version": "ultimate_v2.0_parallel_dedup",
+    "statistics": {
+      "total_processed": 5,
+      "successful_extractions": 5,
+      "failed_extractions": 0,
+      "high_precision_count": 5,
+      "duplicates_removed": 0,
+      "unique_cafes": 5,
+      "start_time": 1756459610.9430678
+    },
+    "precision_stats": {
+      "avg_precision": 0.9,
+      "high_precision_count": 5,
+      "coordinate_sources": {
+        "extract_from_url": 5
+      }
+    },
+    "deduplication_stats": {
+      "unique_cafes": 5,
+      "duplicates_removed": 0,
+      "deduplication_rate": 0.0,
+      "unique_names_tracked": 5,
+      "unique_coordinates_tracked": 5,
+      "unique_hashes_tracked": 5
+    },
+    "parallel_processing": {
+      "max_workers": 3,
+      "batch_size": 10,
+      "processing_mode": "parallel_batches"
+    }
+  },
+  "cafes": [
+    {
+      "name": "Sellie Coffee Malioboro",
+      "address": "Sosromenduran, Gedong Tengen, Kota Yogyakarta, Daerah Istimewa Yogyakarta 55271",
+      "rating": 4.5,
+      "reviews_count": 519,
+      "price_range": "Rp 25–50 rb",
+      "lat": -7.7939257,
+      "lon": 110.3654873,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Coffee Shop",
+      "phone": "0858-7828-5872",
+      "website": "",
+      "opening_hours": "Buka ⋅ Tutup pukul 23.30",
+      "opening_hours_weekly": {},
+      "maps_link": "https://www.google.com/maps/place/Sellie+Coffee+Malioboro/data=!4m7!3m6!1s0x2e7a59aeed4baba7:0xbc3c74fe9eb9b138!8m2!3d-7.7939257!4d110.3654873!16s%2Fg%2F11h1pmb2vf!19sChIJp6tL7a5Zei4ROLG5nv50PLw?authuser=0&hl=id&rclk=1",
+      "search_query": "cafe malioboro yogyakarta",
+      "scraped_at": "2025-08-29T16:27:11.399864",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Karta Coffee & Eatery",
+      "address": "Kafe · Karta Coffee & Eatery, Jl. Malioboro. 52-58, Suryatmajan, Danurejan Plaza Malioboro, Lt. 1 Unit 13-16",
+      "rating": 4.8,
+      "reviews_count": 511,
+      "price_range": "Rp 25–50 rb per orang",
+      "lat": -7.7936271,
+      "lon": 110.3658864,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Coffee Shop",
+      "phone": "0811-1991-995",
+      "website": "http://instagram.com/karta.cafe",
+      "opening_hours": "Buka ⋅ Tutup pukul 22.00",
+      "opening_hours_weekly": {
+        "Jumat": "10.00–22.00",
+        "Sabtu": "09.00–22.00",
+        "Minggu": "09.00–22.00",
+        "Senin": "10.00–22.00",
+        "Selasa": "10.00–22.00",
+        "Rabu": "10.00–22.00",
+        "Kamis": "10.00–22.00"
+      },
+      "maps_link": "https://www.google.com/maps/place/Karta+Coffee+%26+Eatery/data=!4m7!3m6!1s0x2e7a59218cdcadff:0x98af621f09af61f4!8m2!3d-7.7936271!4d110.3658864!16s%2Fg%2F11trh_5cy2!19sChIJ_63cjCFZei4R9GGvCR9ir5g?authuser=0&hl=id&rclk=1",
+      "search_query": "cafe malioboro yogyakarta",
+      "scraped_at": "2025-08-29T16:27:11.452131",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Loko Cafe - Malioboro",
+      "address": "Kafe · Komp. Ps. Kembang, Jl. Ps. Kembang",
+      "rating": 4.5,
+      "reviews_count": 7603,
+      "price_range": "Rp 25–50 rb per orang",
+      "lat": -7.7897901,
+      "lon": 110.3657681,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Modern",
+      "phone": "0814-1090-9860",
+      "website": "https://instagram.com/lokocafe?igshid=OTJlNzQ0NWM=",
+      "opening_hours": "Buka ⋅ Tutup pukul 23.00",
+      "opening_hours_weekly": {
+        "Jumat": "08.00–23.00",
+        "Sabtu": "08.00–23.00",
+        "Minggu": "08.00–23.00",
+        "Senin": "08.00–23.00",
+        "Selasa": "08.00–23.00",
+        "Rabu": "08.00–23.00",
+        "Kamis": "08.00–23.00"
+      },
+      "maps_link": "https://www.google.com/maps/place/Loko+Cafe+-+Malioboro/data=!4m7!3m6!1s0x2e7a59860a4f83d1:0x7cb25403089474ed!8m2!3d-7.7897901!4d110.3657681!16s%2Fg%2F11f616bfcc!19sChIJ0YNPCoZZei4R7XSUCANUsnw?authuser=0&hl=id&rclk=1",
+      "search_query": "cafe malioboro yogyakarta",
+      "scraped_at": "2025-08-29T16:27:11.501617",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Azen Coffee Malioboro",
+      "address": "Kedai Kopi · Jl. Suryatmajan No.39",
+      "rating": 4.7,
+      "reviews_count": 356,
+      "price_range": "Rp 25–50 rb per orang",
+      "lat": -7.7964764,
+      "lon": 110.3678926,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Coffee Shop",
+      "phone": "0877-3834-2829",
+      "website": "",
+      "opening_hours": "Buka ⋅ Tutup pukul 00.00",
+      "opening_hours_weekly": {
+        "Jumat": "08.00–00.00",
+        "Sabtu": "07.00–00.00",
+        "Minggu": "07.00–00.00",
+        "Senin": "08.00–00.00",
+        "Selasa": "08.00–00.00",
+        "Rabu": "08.00–00.00",
+        "Kamis": "08.00–00.00"
+      },
+      "maps_link": "https://www.google.com/maps/place/Azen+Coffee+Malioboro/data=!4m7!3m6!1s0x2e7a5706029f71f7:0x19d22fe42ae80e4e!8m2!3d-7.7964764!4d110.3678926!16s%2Fg%2F11q3mgyzmp!19sChIJ93GfAgZXei4RTg7oKuQv0hk?authuser=0&hl=id&rclk=1",
+      "search_query": "cafe malioboro yogyakarta",
+      "scraped_at": "2025-08-29T16:27:11.647716",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    },
+    {
+      "name": "Kala Jumpa Bar & Dine",
+      "address": "Kafe ·  · Jl. Malioboro No.42",
+      "rating": 4.4,
+      "reviews_count": 166,
+      "price_range": "Rp 50–75 rb per orang",
+      "lat": -7.793899,
+      "lon": 110.3658441,
+      "district": "Jetis",
+      "village": "Bumijo",
+      "regency": "Yogyakarta",
+      "type": "Modern",
+      "phone": "0878-4828-8122",
+      "website": "",
+      "opening_hours": "Buka ⋅ Tutup pukul 23.30",
+      "opening_hours_weekly": {
+        "Jumat": "10.00–23.30",
+        "Sabtu": "10.00–23.30",
+        "Minggu": "10.00–22.00",
+        "Senin": "10.00–22.00",
+        "Selasa": "10.00–22.00",
+        "Rabu": "10.00–22.00",
+        "Kamis": "10.00–23.30"
+      },
+      "maps_link": "https://www.google.com/maps/place/Kala+Jumpa+Bar+%26+Dine/data=!4m7!3m6!1s0x2e7a5926f76eb21b:0x9f783285c4a5ad87!8m2!3d-7.793899!4d110.3658441!16s%2Fg%2F11fpr3r302!19sChIJG7Ju9yZZei4Rh62lxIUyeJ8?authuser=0&hl=id&rclk=1",
+      "search_query": "cafe malioboro yogyakarta",
+      "scraped_at": "2025-08-29T16:27:11.686658",
+      "coordinate_source": "extract_from_url",
+      "precision_score": 0.9
+    }
+  ]
+}
