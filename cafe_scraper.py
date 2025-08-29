@@ -138,7 +138,7 @@ class AntiDetectionManager:
     def get_break_duration(self) -> float:
         """Get break duration in seconds"""
         # 3-8 minute breaks (longer)
-        return random.uniform(100, 500)
+        return random.uniform(90, 480)
 
     def simulate_human_behavior(self, driver):
         """Simulate human-like behavior"""
@@ -350,9 +350,10 @@ class MultiSessionManager:
             self.scraper.driver.quit()
 
         # Wait between sessions
-        rotation_delay = random.uniform(300, 900)  # 5-15 minutes
-        self.scraper.logger.info(f"⏳ Session rotation delay: {rotation_delay/60:.1f} minutes")
-        time.sleep(rotation_delay)
+        if self.session_count > 1 :
+            rotation_delay = random.uniform(200, 900)
+            self.scraper.logger.info(f"⏳ Session rotation delay: {rotation_delay/60:.1f} minutes")
+            time.sleep(rotation_delay)
 
         # Start fresh session
         self.scraper.setup_driver(headless=True)
@@ -552,7 +553,8 @@ class UltimateCafeScraper:
         base_keywords = [
             "cafe", "coffee shop", "kedai kopi", "warung kopi", "tempat ngopi",
             "kopi kekinian", "kopi tradisional", "espresso bar", "roastery",
-            "Eatery Bar & Coffee", "Bar", "Roastery" "Eatery", "coffee house", "kopi enak", "coffee corner", "specialty coffee", "specialty coffee roastery", "coffee reserve"
+            "Eatery Bar & Coffee", "Bar", "Roastery" "Eatery", "coffee house", "kopi enak", "coffee corner",
+            "specialty coffee", "specialty coffee roastery", "coffee reserve"
         ]
 
         contexts = [
@@ -572,7 +574,9 @@ class UltimateCafeScraper:
             "malioboro", "condongcatur", "depok", "caturtunggal", "seturan",
             "gejayan", "pogung", "kentungan", "babarsari", "kalasan", "ngaglik",
             "mlati", "gamping", "godean", "berbah", "prambanan", "cangkringan",
-            "pakem", "turi", "tempel", "seyegan", "minggir", "moyudan",
+            "pakem", "turi", "tempel", "seyegan", "minggir", "moyudan", "jakal",
+            "demangan", "klebengan",
+
             # Bantul
             "sewon", "kasihan", "banguntapan", "pleret", "pajangan", "imogiri",
             "pundong", "kretek", "sanden", "bambanglipuro", "srandakan", "dlingo",
@@ -583,8 +587,6 @@ class UltimateCafeScraper:
             "wonosari", "playen", "paliyan", "panggang", "purwosari", "tepus",
             "rongkop", "girisubo", "semanu", "tanjungsari", "ponjong", "patuk",
             "karangmojo", "gedangsari", "ngawen"
-            # Tambahan
-            "jakal", "gejayan", "demangan", "jl.Affandi", "jakal"
         ]
 
         # Landmark/places of interest
@@ -595,7 +597,12 @@ class UltimateCafeScraper:
             "kaliurang", "merapi museum", "heha sky view", "tebing breksi",
             "pinus pengger", "mangunan", "sindu kusuma edupark",
             "gembira loka zoo", "xt square", "monjali", "yogyakarta international airport",
-            "goa pindul", "waduk sermo", "ugm", "uii", "upn"
+            "goa pindul", "waduk sermo",
+        ]
+
+        # University in Yogyakarta
+        universities_jogja = [
+            "ugm", "uii", "upn", "uin", "uny", "usd", "amikom", "udb", "stikes", "instiper", "akprind", "isi", "ukdw", "uty", "umy", "uad"
         ]
 
         essential_menu = ["magic","latte","dirty latte","matcha","butterscotch","americano","cappuccino","flat white","mocha","caramel macchiato"]
@@ -621,6 +628,13 @@ class UltimateCafeScraper:
             for ctx in contexts:
                 for lm in landmarks:
                     query = f"{kw} {ctx} dekat {lm}".strip()
+                    all_queries.add(query)
+
+        # Tambahin kombinasi dengan university
+        for kw in base_keywords:
+            for ctx in contexts:
+                for uni in universities_jogja:
+                    query = f"{kw} {ctx} sekitar {uni} jogja".strip()
                     all_queries.add(query)
 
         # Tambahin kombinasi dengan menu
@@ -681,7 +695,7 @@ class UltimateCafeScraper:
             )
 
             # Set random wait timeout
-            wait_timeout = random.randint(10, 20)
+            wait_timeout = random.randint(5, 18)
             self.wait = WebDriverWait(self.driver, wait_timeout)
 
             # Execute stealth scripts to hide automation
