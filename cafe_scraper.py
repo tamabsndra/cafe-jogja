@@ -138,7 +138,7 @@ class AntiDetectionManager:
     def get_break_duration(self) -> float:
         """Get break duration in seconds"""
         # 3-8 minute breaks (longer)
-        return random.uniform(90, 480)
+        return random.uniform(90, 360)
 
     def simulate_human_behavior(self, driver):
         """Simulate human-like behavior"""
@@ -351,7 +351,7 @@ class MultiSessionManager:
 
         # Wait between sessions
         if self.session_count > 1 :
-            rotation_delay = random.uniform(200, 900)
+            rotation_delay = random.uniform(120, 420)
             self.scraper.logger.info(f"⏳ Session rotation delay: {rotation_delay/60:.1f} minutes")
             time.sleep(rotation_delay)
 
@@ -446,7 +446,7 @@ class UltimateCafeScraper:
 
         # Productivity tracking with comprehensive settings
         self.consecutive_empty_queries = 0
-        self.max_consecutive_empty = 200  # Increase for comprehensive coverage
+        self.max_consecutive_empty = 500  # Increase for comprehensive coverage
         self.query_performance = {}  # Track query effectiveness
         self.high_yield_mode = False  # Keep comprehensive mode
 
@@ -462,7 +462,7 @@ class UltimateCafeScraper:
         }
 
         # Search strategies with comprehensive mode (user preference for complete coverage)
-        self.search_strategies = self._generate_search_strategies(high_yield_only=False, include_specialty=True)
+        self.search_strategies = self._generate_search_strategies()
 
     def setup_logging(self):
         """Setup comprehensive logging"""
@@ -550,41 +550,20 @@ class UltimateCafeScraper:
             self.logger.debug(f"✅ Added unique cafe: {cafe.name}")
             return True
 
-    def _generate_search_strategies(self, high_yield_only: bool = False, include_specialty: bool = True) -> List[Dict]:
+    def _generate_search_strategies(self) -> List[Dict]:
         """Generate search strategies with optional high-yield filtering and specialty coverage"""
-        
-        # High-yield keywords (proven to return more results)
-        high_yield_keywords = [
-            "cafe", "coffee shop", "kedai kopi", "kopi", "coffee"
-        ]
-        
-        # Specialty keywords for comprehensive coverage
-        specialty_keywords = [
-            "roastery", "specialty coffee", "espresso bar", "coffee house",
-            "warung kopi", "tempat ngopi", "kopi tradisional", "kopi kekinian"
-        ]
-        
+
         # Full keyword set for comprehensive scraping
         base_keywords = [
-            "cafe", "coffee shop", "kedai kopi", "warung kopi", "tempat ngopi",
-            "kopi kekinian", "kopi tradisional", "espresso bar", "roastery",
-            "Eatery Bar & Coffee", "Bar", "Roastery" "Eatery", "coffee house", "kopi enak", "coffee corner",
-            "specialty coffee", "specialty coffee roastery", "coffee reserve"
+            "cafe", "coffee shop", "kedai kopi", "kopi", "coffee",
+            "roastery", "specialty coffee", "espresso bar", "coffee house",
+            "warung kopi", "tempat ngopi", "kopi tradisional", "kopi kekinian",
         ]
-        
-        # Choose keywords based on mode
-        if high_yield_only:
-            if include_specialty:
-                keywords_to_use = high_yield_keywords + specialty_keywords
-            else:
-                keywords_to_use = high_yield_keywords
-        else:
-            keywords_to_use = base_keywords
 
         contexts = [
-            "di", "hits", "viral", "kalcer", "skena", "murah", "instagrammable", "cozy", "buat nugas",
-            "buka 24 jam", "late night", "live music", "view bagus", "populer"
-            "sunset spot", "terdekat", "recommended", "best", "paling rame"
+            "terbaik", "buat nugas", "buka 24 jam", "cozy", "di", "hits", "instagrammable", "kalcer", "late night",
+            "live music", "murah", "paling rame", "populer", "recommended", "skena", "sunset spot",
+            "terdekat", "view bagus", "viral"
         ]
 
         # Kabupaten/Kota-level (DIY regions)
@@ -615,13 +594,13 @@ class UltimateCafeScraper:
 
         # Landmark/places of interest
         landmarks = [
-            "tugu jogja", "keraton yogyakarta", "taman sari", "alun alun kidul",
-            "alun alun utara", "ambarukmo plaza", "hartono mall", "jogja city mall",
-            "prambanan temple", "ratu boko", "parangtritis beach", "bukit bintang",
-            "kaliurang", "merapi museum", "heha sky view", "tebing breksi",
-            "pinus pengger", "mangunan", "sindu kusuma edupark",
-            "gembira loka zoo", "xt square", "monjali", "yogyakarta international airport",
-            "goa pindul", "waduk sermo",
+            "alun alun kidul", "alun alun utara", "ambarukmo plaza", "bukit bintang",
+            "gembira loka zoo", "goa pindul", "hartono mall", "heha sky view",
+            "jogja city mall", "kaliurang", "keraton yogyakarta", "mangunan",
+            "merapi museum", "monjali", "parangtritis beach", "pinus pengger",
+            "prambanan temple", "ratu boko", "sindu kusuma edupark", "taman sari",
+            "tebing breksi", "tugu jogja", "waduk sermo", "xt square",
+            "yogyakarta international airport",
         ]
 
         # University in Yogyakarta
@@ -631,40 +610,41 @@ class UltimateCafeScraper:
 
         essential_menu = ["magic","latte","dirty latte","matcha","butterscotch","americano","cappuccino","flat white","mocha","caramel macchiato"]
 
+        kata_tempat = ["dekat", "di", "sekitar", "area"]
+
         all_queries = set()
 
         # Kombinasi base keywords dengan konteks & wilayah besar
-        for kw in keywords_to_use:
+        for kw in base_keywords:
             for ctx in contexts:
                 for reg in regions:
                     query = f"{kw} {ctx} {reg}".strip()
                     all_queries.add(query)
 
         # Tambahin kombinasi dengan sub-area
-        for kw in keywords_to_use:
-            for ctx in contexts:
-                for area in sub_areas:
-                    query = f"{kw} {ctx} {area}".strip()
-                    all_queries.add(query)
+        for area in sub_areas:
+            query = f"{base_keywords[random.randint(0, len(base_keywords) - 1)]} {kata_tempat[random.randint(0, len(kata_tempat) - 1)]} {area}".strip()
+            all_queries.add(query)
 
         # Tambahin kombinasi dengan landmark
-        for kw in keywords_to_use:
-            for ctx in contexts:
-                for lm in landmarks:
-                    query = f"{kw} {ctx} dekat {lm}".strip()
-                    all_queries.add(query)
+        for kw in base_keywords:
+            for lm in landmarks:
+                query = f"{kw} {kata_tempat[random.randint(0, len(kata_tempat) - 1)]} {lm}".strip()
+                all_queries.add(query)
 
         # Tambahin kombinasi dengan university
-        for kw in keywords_to_use:
+        for kw in base_keywords:
             for ctx in contexts:
                 for uni in universities_jogja:
-                    query = f"{kw} {ctx} sekitar {uni} jogja".strip()
+                    query = f"{kw} {ctx} {kata_tempat[random.randint(0, len(kata_tempat) - 1)]} {uni} jogja".strip()
                     all_queries.add(query)
+
+        awalan = ["jual", "rekomendasi", "beli", "cafe"]
 
         # Tambahin kombinasi dengan menu
         for menu in essential_menu:
             for reg in regions:
-                query = f"{menu} di {reg}".strip()
+                query = f"{awalan[random.randint(0, len(awalan) - 1)]} {menu} {kata_tempat[random.randint(0, len(kata_tempat) - 1)]} {reg}".strip()
                 all_queries.add(query)
 
         strategies = []
@@ -672,36 +652,49 @@ class UltimateCafeScraper:
         for q in sorted(all_queries):
             words = q.split()
 
-            if any(landmark in q.lower() for landmark in landmarks):
+            if any (sub_area in q.lower() for sub_area in sub_areas):
                 strategies.append({
                     'query': q,
                     'expected_results': 100,
                     'priority': 0
                 })
-            elif any(area in q.lower() for area in sub_areas):
-                strategies.append({
-                    'query': q,
-                    'expected_results': 100,
-                    'priority': 1
-                })
-            elif 'dekat' not in q.lower() and len(words) <= 10:  # Simple, general queries
-                strategies.append({
-                    'query': q,
-                    'expected_results': 100,
-                    'priority': 1
-                })
-            elif 'dekat' in q.lower() and len(words) <= 10:  # Simple "near" queries
-                strategies.append({
-                    'query': q,
-                    'expected_results': 100,
-                    'priority': 2
-                })
-            else:
-                strategies.append({
-                    'query': q,
-                    'expected_results': 100,
-                    'priority': 2
-                })
+
+            # if any(region in q.lower() for region in regions):
+            #     strategies.append({
+            #         'query': q,
+            #         'expected_results': 100,
+            #         'priority': 0
+            #     })
+            # elif any(uni in q.lower() for uni in universities_jogja):
+            #     strategies.append({
+            #         'query': q,
+            #         'expected_results': 100,
+            #         'priority': 1
+            #     })
+            # elif any(menu in q.lower() for menu in essential_menu):
+            #     strategies.append({
+            #         'query': q,
+            #         'expected_results': 100,
+            #         'priority': 2
+            #     })
+            # elif 'dekat' not in q.lower() and len(words) <= 10:  # Simple, general queries
+            #     strategies.append({
+            #         'query': q,
+            #         'expected_results': 100,
+            #         'priority': 3
+            #     })
+            # elif 'dekat' in q.lower() and len(words) <= 10:  # Simple "near" queries
+            #     strategies.append({
+            #         'query': q,
+            #         'expected_results': 100,
+            #         'priority': 4
+            #     })
+            # else:
+            #     strategies.append({
+            #         'query': q,
+            #         'expected_results': 100,
+            #         'priority': 5
+            #     })
 
         strategies.sort(key=lambda x: (x['priority'], -x['expected_results']))
 
@@ -1009,7 +1002,7 @@ class UltimateCafeScraper:
 
             # Parse additional info
             for line in lines[1:]:
-                # Combined rating, reviews, and price extraction from lines like "4,5(7.602) · Rp 25–50 rb"
+                # Combined rating, reviews, and price extraction from lines like "4,5(7.602) · Rp 25-50 rb"
                 rating_reviews_price_match = re.search(r'(\d+[.,]\d+)\s*\(([0-9,.k]+)\)\s*·\s*(.*)', line)
                 if rating_reviews_price_match:
                     # Extract rating
@@ -1056,12 +1049,12 @@ class UltimateCafeScraper:
 
                 # Standalone price patterns (without separator)
                 elif not cafe.price_range and any(currency in line for currency in ['Rp', '$', '€', 'USD', 'IDR']):
-                    # Look for price patterns like "Rp 25–50 rb", "$10-20", etc.
+                    # Look for price patterns like "Rp 25-50 rb", "$10-20", etc.
                     price_patterns = [
-                        r'Rp\s*[\d.,]+\s*[–-]\s*[\d.,]+\s*(?:rb|ribu|k)?',
-                        r'\$\s*[\d.,]+\s*[–-]\s*[\d.,]+',
-                        r'€\s*[\d.,]+\s*[–-]\s*[\d.,]+',
-                        r'[\d.,]+\s*[–-]\s*[\d.,]+\s*(?:USD|IDR|rb|ribu)',
+                        r'Rp\s*[\d.,]+\s*[--]\s*[\d.,]+\s*(?:rb|ribu|k)?',
+                        r'\$\s*[\d.,]+\s*[--]\s*[\d.,]+',
+                        r'€\s*[\d.,]+\s*[--]\s*[\d.,]+',
+                        r'[\d.,]+\s*[--]\s*[\d.,]+\s*(?:USD|IDR|rb|ribu)',
                     ]
 
                     for pattern in price_patterns:
@@ -1585,14 +1578,14 @@ class UltimateCafeScraper:
                 else:
                     self.consecutive_empty_queries += 1
                     self.query_performance[query] = 0
-                    
+
                 # Switch to high-yield mode if too many empty queries
                 if self.consecutive_empty_queries >= 50 and not self.high_yield_mode:
                     self.logger.info("🔄 Switching to high-yield query mode")
                     self.high_yield_mode = True
                     # Regenerate strategies with high-yield keywords only
                     remaining_strategies = strategies[i+1:]
-                    high_yield_strategies = self._generate_search_strategies(high_yield_only=True)
+                    high_yield_strategies = self._generate_search_strategies()
                     strategies = strategies[:i+1] + high_yield_strategies[:len(remaining_strategies)]
 
                 # Early stopping if too many consecutive empty queries

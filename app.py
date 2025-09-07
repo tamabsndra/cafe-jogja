@@ -42,7 +42,7 @@ class AdvancedSIGApp:
         try:
             # Try to load from new scraper first, fallback to old data
             data_files = [
-                'data/progress/json/progress_20250829_084903.json'
+                'data/merged_cafes_20250901_080649.json'
             ]
 
             data = None
