@@ -1,24 +1,3 @@
-#!/usr/bin/env python3
-"""
-🎯 ULTIMATE CAFE SCRAPER FOR YOGYAKARTA
-===========================================
-
-One unified scraper with all features:
-✅ Precise coordinate extraction from Google Maps
-✅ Multiple extraction methods (URL, data-attrs, onclick, aria-label)
-✅ Automatic validation and quality scoring
-✅ Smart rate limiting and anti-detection
-✅ Progress tracking and resume capability
-✅ Multiple output formats (JSON, CSV, GeoJSON)
-✅ Real-time monitoring and statistics
-
-Usage:
-    python3 cafe_scraper.py --help
-    python3 cafe_scraper.py --quick-test
-    python3 cafe_scraper.py --full-scrape --max-cafes 1000
-    python3 cafe_scraper.py --area malioboro --max-cafes 50
-"""
-
 import json
 import time
 import random
@@ -28,13 +7,14 @@ import os
 import csv
 import hashlib
 import re
+import signal
+import sys
 from datetime import datetime
 from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Set, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
-# Selenium imports
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -45,7 +25,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Additional imports for anti-detection
 import socket
 import urllib.parse
 import requests
@@ -461,6 +440,16 @@ class UltimateCafeScraper:
             'start_time': time.time()
         }
 
+        # Pause/Resume functionality
+        self.is_paused = False
+        self.should_stop = False
+        self.current_strategy_index = 0
+        self.state_file = os.path.join(self.output_dir, "scraper_state.json")
+        self.resume_data_file = os.path.join(self.output_dir, "resume_data.json")
+
+        # Setup signal handlers for pause/resume
+        self.setup_signal_handlers()
+
         # Search strategies with comprehensive mode (user preference for complete coverage)
         self.search_strategies = self._generate_search_strategies()
 
@@ -482,6 +471,141 @@ class UltimateCafeScraper:
         """Setup output directories"""
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs('logs', exist_ok=True)
+
+    def setup_signal_handlers(self):
+        """Setup signal handlers for pause/resume functionality"""
+        def signal_handler(signum, frame):
+            if signum == signal.SIGINT:  # Ctrl+C
+                print("\n⏸️  Pausing scraper... Press 'r' + Enter to resume, 'q' + Enter to quit")
+                self.is_paused = True
+                self.save_state()
+            elif signum == signal.SIGTERM:  # Termination signal
+                print("\n🛑 Stopping scraper...")
+                self.should_stop = True
+                self.save_state()
+
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
+
+    def save_state(self):
+        """Save current scraping state for resume functionality"""
+        try:
+            state_data = {
+                'current_strategy_index': self.current_strategy_index,
+                'consecutive_empty_queries': self.consecutive_empty_queries,
+                'high_yield_mode': self.high_yield_mode,
+                'query_performance': self.query_performance,
+                'stats': self.stats,
+                'seen_hashes': list(self.seen_hashes),
+                'seen_names': list(self.seen_names),
+                'seen_coordinates': list(self.seen_coordinates),
+                'timestamp': datetime.now().isoformat()
+            }
+
+            with open(self.state_file, 'w', encoding='utf-8') as f:
+                json.dump(state_data, f, indent=2, ensure_ascii=False)
+
+            # Save current cafe data
+            resume_data = {
+                'cafes': [asdict(cafe) for cafe in self.all_cafes],
+                'metadata': {
+                    'total_cafes': len(self.all_cafes),
+                    'saved_at': datetime.now().isoformat(),
+                    'scraper_version': 'ultimate_v2.0_pause_resume'
+                }
+            }
+
+            with open(self.resume_data_file, 'w', encoding='utf-8') as f:
+                json.dump(resume_data, f, indent=2, ensure_ascii=False)
+
+            self.logger.info(f"💾 State saved to {self.state_file}")
+            self.logger.info(f"💾 Resume data saved to {self.resume_data_file}")
+
+        except Exception as e:
+            self.logger.error(f"❌ Failed to save state: {e}")
+
+    def load_state(self) -> bool:
+        """Load previous scraping state for resume functionality"""
+        try:
+            if not os.path.exists(self.state_file) or not os.path.exists(self.resume_data_file):
+                return False
+
+            # Load state
+            with open(self.state_file, 'r', encoding='utf-8') as f:
+                state_data = json.load(f)
+
+            self.current_strategy_index = state_data.get('current_strategy_index', 0)
+            self.consecutive_empty_queries = state_data.get('consecutive_empty_queries', 0)
+            self.high_yield_mode = state_data.get('high_yield_mode', False)
+            self.query_performance = state_data.get('query_performance', {})
+            self.stats = state_data.get('stats', self.stats)
+
+            # Restore deduplication sets
+            self.seen_hashes = set(state_data.get('seen_hashes', []))
+            self.seen_names = set(state_data.get('seen_names', []))
+            self.seen_coordinates = set(tuple(coord) if isinstance(coord, list) else coord
+                                     for coord in state_data.get('seen_coordinates', []))
+
+            # Load cafe data
+            with open(self.resume_data_file, 'r', encoding='utf-8') as f:
+                resume_data = json.load(f)
+
+            # Restore cafes
+            self.all_cafes = []
+            for cafe_dict in resume_data.get('cafes', []):
+                # Convert dict back to CafeData object
+                cafe = CafeData(**cafe_dict)
+                self.all_cafes.append(cafe)
+
+            saved_time = state_data.get('timestamp', 'unknown')
+            self.logger.info(f"✅ State loaded from {saved_time}")
+            self.logger.info(f"📊 Resuming from strategy {self.current_strategy_index + 1}")
+            self.logger.info(f"📋 {len(self.all_cafes)} cafes already scraped")
+
+            return True
+
+        except Exception as e:
+            self.logger.error(f"❌ Failed to load state: {e}")
+            return False
+
+    def clear_state(self):
+        """Clear saved state files"""
+        try:
+            if os.path.exists(self.state_file):
+                os.remove(self.state_file)
+            if os.path.exists(self.resume_data_file):
+                os.remove(self.resume_data_file)
+            self.logger.info("🗑️  Previous state cleared")
+        except Exception as e:
+            self.logger.warning(f"⚠️ Failed to clear state: {e}")
+
+    def handle_pause(self):
+        """Handle pause state with user input"""
+        while self.is_paused and not self.should_stop:
+            try:
+                user_input = input("⏸️  Scraper is paused. Enter 'r' to resume, 'q' to quit, 's' to save and quit: ").strip().lower()
+
+                if user_input == 'r':
+                    print("▶️  Resuming scraper...")
+                    self.is_paused = False
+                    break
+                elif user_input == 'q':
+                    print("🛑 Quitting without saving...")
+                    self.should_stop = True
+                    break
+                elif user_input == 's':
+                    print("💾 Saving and quitting...")
+                    self.save_state()
+                    self.save_data("paused")
+                    self.should_stop = True
+                    break
+                else:
+                    print("Invalid input. Use 'r' to resume, 'q' to quit, 's' to save and quit")
+
+            except (EOFError, KeyboardInterrupt):
+                print("\n🛑 Force quit detected")
+                self.should_stop = True
+                break
 
     def is_duplicate(self, cafe: CafeData) -> bool:
         """Enhanced duplicate detection with multiple criteria"""
@@ -659,42 +783,42 @@ class UltimateCafeScraper:
                     'priority': 0
                 })
 
-            # if any(region in q.lower() for region in regions):
-            #     strategies.append({
-            #         'query': q,
-            #         'expected_results': 100,
-            #         'priority': 0
-            #     })
-            # elif any(uni in q.lower() for uni in universities_jogja):
-            #     strategies.append({
-            #         'query': q,
-            #         'expected_results': 100,
-            #         'priority': 1
-            #     })
-            # elif any(menu in q.lower() for menu in essential_menu):
-            #     strategies.append({
-            #         'query': q,
-            #         'expected_results': 100,
-            #         'priority': 2
-            #     })
-            # elif 'dekat' not in q.lower() and len(words) <= 10:  # Simple, general queries
-            #     strategies.append({
-            #         'query': q,
-            #         'expected_results': 100,
-            #         'priority': 3
-            #     })
-            # elif 'dekat' in q.lower() and len(words) <= 10:  # Simple "near" queries
-            #     strategies.append({
-            #         'query': q,
-            #         'expected_results': 100,
-            #         'priority': 4
-            #     })
-            # else:
-            #     strategies.append({
-            #         'query': q,
-            #         'expected_results': 100,
-            #         'priority': 5
-            #     })
+            if any(region in q.lower() for region in regions):
+                strategies.append({
+                    'query': q,
+                    'expected_results': 100,
+                    'priority': 0
+                })
+            elif any(uni in q.lower() for uni in universities_jogja):
+                strategies.append({
+                    'query': q,
+                    'expected_results': 100,
+                    'priority': 1
+                })
+            elif any(menu in q.lower() for menu in essential_menu):
+                strategies.append({
+                    'query': q,
+                    'expected_results': 100,
+                    'priority': 2
+                })
+            elif 'dekat' not in q.lower() and len(words) <= 10:  # Simple, general queries
+                strategies.append({
+                    'query': q,
+                    'expected_results': 100,
+                    'priority': 3
+                })
+            elif 'dekat' in q.lower() and len(words) <= 10:  # Simple "near" queries
+                strategies.append({
+                    'query': q,
+                    'expected_results': 100,
+                    'priority': 4
+                })
+            else:
+                strategies.append({
+                    'query': q,
+                    'expected_results': 100,
+                    'priority': 5
+                })
 
         strategies.sort(key=lambda x: (x['priority'], -x['expected_results']))
 
@@ -1530,14 +1654,30 @@ class UltimateCafeScraper:
 
     def full_scrape(self, max_cafes: int = 1000, area_filter: str = None, results_per_query: int = 100,
                    batch_mode: bool = False, batch_size: int = 5, batch_interval: int = 1800,
-                   multi_session: bool = False, session_duration: int = 3600, max_queries_per_session: int = 10):
+                   multi_session: bool = False, session_duration: int = 3600, max_queries_per_session: int = 10,
+                   resume: bool = False):
         """Full scraping with all strategies and optional batch/multi-session processing"""
-        self.logger.info(f"🚀 Starting full scrape (target: {max_cafes} cafes)")
+
+        # Handle resume functionality
+        if resume:
+            if self.load_state():
+                self.logger.info("✅ Resuming from previous session")
+            else:
+                self.logger.info("⚠️  No previous state found, starting fresh")
+                resume = False
+        else:
+            # Clear any existing state if not resuming
+            self.clear_state()
+
+        self.logger.info(f"🚀 Starting {'resumed' if resume else 'new'} full scrape (target: {max_cafes} cafes)")
 
         if batch_mode:
             self.logger.info(f"🔄 Batch mode enabled: {batch_size} queries per batch, {batch_interval/60:.1f}min intervals")
         elif multi_session:
             self.logger.info(f"🔄 Multi-session mode: {max_queries_per_session} queries per session, {session_duration/3600:.1f}h max duration")
+
+        # Print pause/resume instructions
+        self.logger.info("ℹ️  Controls: Ctrl+C to pause, then 'r' to resume, 's' to save & quit, 'q' to quit")
 
         try:
             strategies = self.search_strategies
@@ -1556,63 +1696,102 @@ class UltimateCafeScraper:
                 session_manager.process_strategies_with_rotation(strategies, max_cafes)
                 return
 
-            # Standard processing
+            # Standard processing with pause/resume support
             self.setup_driver(headless=True)
 
-            for i, strategy in enumerate(strategies):
+            # Start from current strategy index if resuming
+            start_index = self.current_strategy_index if resume else 0
+
+            for i in range(start_index, len(strategies)):
+                # Check for stop signal
+                if self.should_stop:
+                    self.logger.info("🛑 Stopping scraper as requested")
+                    break
+
+                # Handle pause state
+                if self.is_paused:
+                    self.save_state()  # Save before pausing
+                    self.handle_pause()
+
+                    # Check if user chose to quit during pause
+                    if self.should_stop:
+                        break
+
+                # Update current strategy index
+                self.current_strategy_index = i
+
                 if len(self.all_cafes) >= max_cafes:
                     self.logger.info(f"🎯 Target reached: {len(self.all_cafes)} cafes")
                     break
 
+                strategy = strategies[i]
                 query = strategy['query']
                 expected = min(strategy['expected_results'], results_per_query)  # Use the smaller value
 
                 self.logger.info(f"\n📋 Strategy {i+1}/{len(strategies)}: {query} (max {expected} results)")
 
-                results = self.search_and_extract(query, expected)
+                try:
+                    results = self.search_and_extract(query, expected)
 
-                # Track query performance for adaptive optimization
-                if results:
-                    self.query_performance[query] = len(results)
-                    self.consecutive_empty_queries = 0
-                else:
-                    self.consecutive_empty_queries += 1
-                    self.query_performance[query] = 0
+                    # Track query performance for adaptive optimization
+                    if results:
+                        self.query_performance[query] = len(results)
+                        self.consecutive_empty_queries = 0
+                    else:
+                        self.consecutive_empty_queries += 1
+                        self.query_performance[query] = 0
 
-                # Switch to high-yield mode if too many empty queries
-                if self.consecutive_empty_queries >= 50 and not self.high_yield_mode:
-                    self.logger.info("🔄 Switching to high-yield query mode")
-                    self.high_yield_mode = True
-                    # Regenerate strategies with high-yield keywords only
-                    remaining_strategies = strategies[i+1:]
-                    high_yield_strategies = self._generate_search_strategies()
-                    strategies = strategies[:i+1] + high_yield_strategies[:len(remaining_strategies)]
+                    # Switch to high-yield mode if too many empty queries
+                    if self.consecutive_empty_queries >= 50 and not self.high_yield_mode:
+                        self.logger.info("🔄 Switching to high-yield query mode")
+                        self.high_yield_mode = True
+                        # Regenerate strategies with high-yield keywords only
+                        remaining_strategies = strategies[i+1:]
+                        high_yield_strategies = self._generate_search_strategies()
+                        strategies = strategies[:i+1] + high_yield_strategies[:len(remaining_strategies)]
 
-                # Early stopping if too many consecutive empty queries
-                if self.consecutive_empty_queries >= self.max_consecutive_empty:
-                    self.logger.warning(f"⚠️ Stopping due to {self.consecutive_empty_queries} consecutive empty queries")
-                    break
+                    # Early stopping if too many consecutive empty queries
+                    if self.consecutive_empty_queries >= self.max_consecutive_empty:
+                        self.logger.warning(f"⚠️ Stopping due to {self.consecutive_empty_queries} consecutive empty queries")
+                        break
 
-                self.logger.info(f"📊 Progress: {len(self.all_cafes)}/{max_cafes} cafes | 🔄 Duplicates: {self.stats['duplicates_removed']} | ✅ Unique: {self.stats['unique_cafes']}")
+                    self.logger.info(f"📊 Progress: {len(self.all_cafes)}/{max_cafes} cafes | 🔄 Duplicates: {self.stats['duplicates_removed']} | ✅ Unique: {self.stats['unique_cafes']}")
 
-                # Save progress periodically
-                if (i + 1) % 20 == 0:
-                    self.save_data("progress")
+                    # Save progress periodically and save state
+                    if (i + 1) % 20 == 0:
+                        self.save_data("progress")
+                        self.save_state()
 
-                # Rate limiting between queries
-                time.sleep(random.uniform(5, 10))
+                    # Rate limiting between queries
+                    time.sleep(random.uniform(5, 10))
 
-            # Save final results
-            self.save_data("final")
+                except KeyboardInterrupt:
+                    self.logger.info("⏸️  Keyboard interrupt - pausing...")
+                    self.is_paused = True
+                    continue
+                except Exception as e:
+                    self.logger.error(f"❌ Error processing query '{query}': {e}")
+                    continue
 
-            # Print final summary with deduplication stats
-            self.print_final_summary()
+            # Save final results and clear state if completed successfully
+            if not self.should_stop and not self.is_paused:
+                self.save_data("final")
+                self.clear_state()  # Clear state after successful completion
+                self.print_final_summary()
+            else:
+                # Save current progress
+                self.save_data("interrupted")
+                self.save_state()
+                self.logger.info("💾 Progress saved. Use --resume to continue later.")
 
         except KeyboardInterrupt:
-            self.logger.info("⏸️ Scraping interrupted - saving progress")
+            self.logger.info("⏸️  Scraping interrupted - saving progress")
             self.save_data("interrupted")
+            self.save_state()
         except Exception as e:
             self.logger.error(f"❌ Full scrape failed: {e}")
+            self.save_data("error")
+            self.save_state()
         finally:
             if self.driver:
                 self.driver.quit()
@@ -1662,6 +1841,11 @@ class UltimateCafeScraper:
             self.logger.info(f"   • Coordinate Sources:")
             for source, count in sorted(sources.items(), key=lambda x: x[1], reverse=True):
                 self.logger.info(f"     - {source}: {count}")
+
+        # Pause/Resume info
+        self.logger.info(f"\n⏸️ PAUSE/RESUME INFO:")
+        self.logger.info(f"   • State files cleared (scraping completed successfully)")
+        self.logger.info(f"   • Final strategy index: {self.current_strategy_index + 1}")
 
         self.logger.info("="*60)
 
@@ -1744,6 +1928,8 @@ def main():
     parser = argparse.ArgumentParser(description='Ultimate Cafe Scraper for Yogyakarta')
     parser.add_argument('--quick-test', action='store_true', help='Run quick test with 5 cafes')
     parser.add_argument('--full-scrape', action='store_true', help='Run full scraping')
+    parser.add_argument('--resume', action='store_true', help='Resume from previous session')
+    parser.add_argument('--clear-state', action='store_true', help='Clear saved state and start fresh')
     parser.add_argument('--max-cafes', type=int, default=1000, help='Maximum cafes to scrape')
     parser.add_argument('--area', type=str, help='Filter by area (e.g., malioboro, sleman)')
     parser.add_argument('--query', type=str, help='Custom search query')
@@ -1777,12 +1963,17 @@ def main():
     scraper.max_consecutive_empty = args.max_empty_queries
 
     try:
+        if args.clear_state:
+            scraper.clear_state()
+            print("✅ Previous state cleared")
+            return
+
         if args.quick_test:
             query = args.query or "cafe malioboro yogyakarta"
             extract_details = not args.no_details  # Default True unless --no-details is specified
             scraper.quick_test(query, 5, extract_details)
 
-        elif args.full_scrape:
+        elif args.full_scrape or args.resume:
             scraper.full_scrape(
                 max_cafes=args.max_cafes,
                 area_filter=args.area,
@@ -1792,7 +1983,8 @@ def main():
                 batch_interval=args.stealth_interval,
                 multi_session=args.multi_session,
                 session_duration=args.session_duration,
-                max_queries_per_session=args.queries_per_session
+                max_queries_per_session=args.queries_per_session,
+                resume=args.resume
             )
 
         elif args.query:
@@ -1807,8 +1999,15 @@ def main():
             print("Usage examples:")
             print("  python3 cafe_scraper.py --quick-test")
             print("  python3 cafe_scraper.py --full-scrape --max-cafes 500")
+            print("  python3 cafe_scraper.py --resume  # Resume from previous session")
+            print("  python3 cafe_scraper.py --clear-state  # Clear saved progress")
             print("  python3 cafe_scraper.py --area malioboro --max-cafes 50")
             print("  python3 cafe_scraper.py --query 'coffee shop sleman' --max-cafes 100")
+            print("")
+            print("🎮 Pause/Resume Controls:")
+            print("  - Press Ctrl+C during scraping to pause")
+            print("  - When paused: 'r' to resume, 's' to save & quit, 'q' to quit")
+            print("  - Use --resume to continue from where you left off")
 
     except Exception as e:
         print(f"❌ Error: {e}")

@@ -1,0 +1,126 @@
+{
+  "current_strategy_index": 5,
+  "consecutive_empty_queries": 1,
+  "high_yield_mode": false,
+  "query_performance": {
+    "beli americano dekat bantul": 11,
+    "beli americano sekitar gunungkidul": 0,
+    "beli americano sekitar kulon progo": 0,
+    "beli butterscotch di yogyakarta": 0,
+    "beli butterscotch dekat yogyakarta": 0,
+    "beli butterscotch sekitar sleman": 5,
+    "beli cappuccino di kota jogja": 0
+  },
+  "stats": {
+    "total_processed": 16,
+    "successful_extractions": 16,
+    "failed_extractions": 0,
+    "high_precision_count": 16,
+    "duplicates_removed": 0,
+    "unique_cafes": 16,
+    "start_time": 1758469196.0614989
+  },
+  "seen_hashes": [
+    "fd9564fe1d1a17f1edf1a20c9f535b51",
+    "24c8f18affb89a4f24c6755677b306d8",
+    "1a229198e3944d4bda2251c9872b6c97",
+    "fb5dd6117792b18e3cae4218c47bca72",
+    "af21c8a58720c4df467e6297f8477273",
+    "18f670deb6d25019ccc0102e137fbf06",
+    "23a0abdc2a72fe5299f927caf38a1336",
+    "8db1e26daa9474f59219d4d353f72d6d",
+    "4bd1992f17cf9ff8c56745b9e04caf88",
+    "d87217ab3df406919a539042fc65ffe3",
+    "d1aade1be674be1892961e98472e978c",
+    "637044196d1e09812ba1c3ed84de489e",
+    "f5e032e1a54d30cc7de4c7e234e54c87",
+    "22af65d40287a8ac3e79984715f06e19",
+    "7267c8f36480de795915519bebf6a91e",
+    "473462c92bccd605a08e11cd63297c0f"
+  ],
+  "seen_names": [
+    "bloomery cake patisserie jakal yogyakarta",
+    "el klasiko coffee and art",
+    "intisari sleman city hall",
+    "séna kopi pâtisserie",
+    "boemi sae",
+    "javanesa coffeee",
+    "shelter sambat",
+    "sastros",
+    "skoppi",
+    "passion",
+    "cinema bakery",
+    "kalola space ꦏꦭꦭꦱꦥꦕ",
+    "mantras",
+    "jagongan coffee roasters",
+    "americano hotel syariah",
+    "haia space"
+  ],
+  "seen_coordinates": [
+    [
+      -7.7603,
+      110.381
+    ],
+    [
+      -7.882,
+      110.3251
+    ],
+    [
+      -7.8876,
+      110.328
+    ],
+    [
+      -7.6706,
+      110.4211
+    ],
+    [
+      -7.8322,
+      110.3747
+    ],
+    [
+      -7.8502,
+      110.3495
+    ],
+    [
+      -7.7355,
+      110.3801
+    ],
+    [
+      -7.8153,
+      110.3313
+    ],
+    [
+      -7.8699,
+      110.3531
+    ],
+    [
+      -7.7203,
+      110.3622
+    ],
+    [
+      -7.8828,
+      110.3322
+    ],
+    [
+      -7.8262,
+      110.3201
+    ],
+    [
+      -7.842,
+      110.3227
+    ],
+    [
+      -7.7523,
+      110.3942
+    ],
+    [
+      -7.9002,
+      110.3461
+    ],
+    [
+      -7.8412,
+      110.3436
+    ]
+  ],
+  "timestamp": "2025-09-21T22:46:09.319675"
+}
